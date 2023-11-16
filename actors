@@ -5,32 +5,34 @@ class Actor:
     def __init__(self, name, level):
         self.name = name
         self.level = level
+        self.hp = 100 * level
 
     def __repr__(self):
         return '<Actor: {}, Level:{}'.format(self.name, self.level)
     
+    def stats(self):
+        print('{}: {}hp'.format(self.name, self.hp))
+    
+    def is_alive(self):
+        return self.hp > 0
+    
     def get_attack_power(self):
-        return randint(1, 100) * self.level
+        return randint(1, 10) * self.level
 
     def attacks(self, other):
         raise NotImplementedError() # will warn that this isnt implemented as this will be specific to the actor type.
     
 
 class Player(Actor):
+
+    def heal(self):
+        self.hp += 10
     
     def attacks(self, enemy):
         power = self.get_attack_power()
-        enemy_power = enemy.get_attack_power()
-
-        print('You summon {} power units!'.format(power))
-        print('{} summons {} power units!'.format(enemy.kind, enemy_power))
-
-        if power >= enemy_power:
-            print('You slay the {}'.format(enemy.kind))
-            return True
-        else:
-            print('You were defeated!')
-            return False
+        print('{} attacks the {}'.format(self.name, enemy.kind))
+        print('{} has {} attack power'.format(self.name, power))
+        enemy.hp -= power
 
 
 class Enemy(Actor):
@@ -38,8 +40,12 @@ class Enemy(Actor):
         super().__init__(name, level)
         self.kind = kind
 
-    def __repr__(self):
-        return '<Enemy: {}>'.format(self.kind)
+    def attacks(self, player):
+        print('{} the {} attacks {}'.format(self.name, self.kind, player.name))
+        e_power = self.get_attack_power()
+        print('{} has {} attack power'.format(self.name, e_power))
+        player.hp -= e_power
+
 
 class Ogre(Enemy):
     def __init__(self, name, level, size):
@@ -47,22 +53,17 @@ class Ogre(Enemy):
         self.size = size
 
     def get_attack_power(self):
-        return randint(1, 50) * (self.size * self.level)
+        return randint(1, 5) * (self.size * self.level)
 
 class Imp(Enemy):
     def __init__(self, name, level):
         super().__init__(name, level, 'Imp')
 
     def get_attack_power(self):
-        return super().get_attack_power() / 4
+        return int(super().get_attack_power() / 4)
     
     
 ## if __name__ == '__main__': used to only run code if this file is run. Not if imported.
 if __name__ == '__main__':
     player = Player(name='James',level=1)
-    print(player)
-    print(player.get_attack_power())
-    # enemy = Enemy(kind='Ogre', level=1)
-    # print(enemy)
-    # print(enemy.level)
-
+    ogre = Ogre('Bob', level=1, size=2)
